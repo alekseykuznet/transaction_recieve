@@ -6,6 +6,6 @@ use App\Http\Controllers\Api\TaskController;
 
 Route::prefix('task')->group(function () {
 
-    Route::get('/recieve', [TaskController::class, 'recieve']);
+    Route::get('/receive', [TaskController::class, 'receive']);
 });
 

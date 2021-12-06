@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Classes\Settings;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
@@ -12,18 +13,13 @@ class TaskController extends Controller
 {
     use ApiResponse;
 
-    public function recieve(Request $request)
+    public function receive(Request $request)
     {
-        if (Storage::disk('local')->exists(env('PRIVATE_FILENAME')) === false
-            || Storage::disk('local')->exists(env('PUBLIC_FILENAME')) === false) {
-            return $this->sendError('Key not found');
-        }
-
-        $clientId = $request->input('client_id') ?? null;
-        $sum = $request->input('sum') ?? null;
-        $commision = $request->input('commision') ?? null;
-        $orderNumber = $request->input('orderNumber') ?? null;
-        $signature = trim($request->getContent()) ?? null;
+        $clientId = $request->input('client_id', null);
+        $sum = $request->input('sum', null);
+        $commision = $request->input('commision', null);
+        $orderNumber = $request->input('orderNumber', null);
+        $signature = trim($request->getContent(), null);
 
         $data = [
             'client_id' => $clientId,
@@ -32,7 +28,7 @@ class TaskController extends Controller
             'orderNumber' => $orderNumber,
         ];
 
-        $publicKey = Storage::disk('local')->get(env('PUBLIC_FILENAME'));
+        $publicKey = Settings::get();
         $isVerify = openssl_verify(json_encode($data), $signature, $publicKey, "sha256WithRSAEncryption");
 
         if ($isVerify === 0) {
